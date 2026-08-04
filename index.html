@@ -865,6 +865,101 @@
         grid-column: 1 / -1;
       }
     }
+
+    .format-control {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .format-button {
+      min-height: 48px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: white;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .format-button.active {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: white;
+    }
+
+    .free-throw-panel {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #0b1f43, #12366f);
+      color: white;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .free-throw-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .free-throw-title {
+      font-size: 18px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .free-throw-line {
+      font-size: 24px;
+      font-weight: 950;
+    }
+
+    .free-throw-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .free-throw-buttons button {
+      min-height: 54px;
+      border: 0;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .ft-made {
+      background: #16a34a;
+      color: white;
+    }
+
+    .ft-miss {
+      background: #f59e0b;
+      color: #1f2937;
+    }
+
+    .ft-undo {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .summary-matrix {
+      min-width: 790px;
+    }
+
+    .summary-matrix .percent-cell {
+      font-weight: 900;
+    }
+
+    @media (max-width: 620px) {
+      .format-control,
+      .free-throw-buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+
   </style>
 </head>
 
@@ -882,11 +977,11 @@
         <p class="brand-tagline">Coach What Matters.</p>
       </div>
 
-      <div class="team-badge">Sideline IQ</div>
+      <div class="team-badge">Lady Lancers</div>
     </header>
 
     <p class="brand-description">
-      Sideline IQ game tracking powered by Sideline IQ.
+      Lady Lancers game tracking powered by Sideline IQ.
     </p>
 
     <section class="game-info">
@@ -896,12 +991,16 @@
         placeholder="Opponent name"
       >
 
-      <select id="quarter">
-        <option value="1">Quarter 1</option>
-        <option value="2">Quarter 2</option>
-        <option value="3">Quarter 3</option>
-        <option value="4">Quarter 4</option>
-      </select>
+      <div class="format-control" aria-label="Game format">
+        <button id="quartersFormatButton" class="format-button" type="button">
+          Quarters
+        </button>
+        <button id="halvesFormatButton" class="format-button" type="button">
+          Halves
+        </button>
+      </div>
+
+      <select id="quarter" aria-label="Current period"></select>
     </section>
 
     <nav class="tabs">
@@ -947,13 +1046,32 @@
         </div>
       </section>
 
+      <section class="free-throw-panel">
+        <div class="free-throw-header">
+          <div class="free-throw-title">Free Throws</div>
+          <div id="freeThrowLine" class="free-throw-line">0 / 0 — 0.0%</div>
+        </div>
+
+        <div class="free-throw-buttons">
+          <button id="freeThrowMadeButton" class="ft-made" type="button">
+            + Made
+          </button>
+          <button id="freeThrowMissButton" class="ft-miss" type="button">
+            + Attempt (Miss)
+          </button>
+          <button id="undoFreeThrowButton" class="ft-undo" type="button">
+            Undo FT
+          </button>
+        </div>
+      </section>
+
       <div class="actions">
         <button id="globalUndoButton" class="action">
           Undo last team stat
         </button>
 
         <button id="nextQuarterButton" class="action primary">
-          Next quarter
+          Next period
         </button>
 
         <button id="newGameButton" class="action danger">
@@ -1002,12 +1120,9 @@
             <thead>
               <tr>
                 <th>Player</th>
-                <th>Q1</th>
-                <th>Q2</th>
                 <th>1st Half</th>
-                <th>Q3</th>
-                <th>Q4</th>
                 <th>2nd Half</th>
+                <th>OT</th>
                 <th>Total</th>
               </tr>
             </thead>
@@ -1018,40 +1133,13 @@
       </section>
 
       <section class="summary-section">
-        <h2 class="summary-heading">First Half Team Stats</h2>
-        <div id="firstHalfSummary" class="summary-grid"></div>
+        <h2 class="summary-heading">Team Stat Summary</h2>
+        <div id="teamSummaryMatrix" class="table-wrap"></div>
       </section>
 
       <section class="summary-section">
-        <h2 class="summary-heading">Second Half Team Stats</h2>
-        <div id="secondHalfSummary" class="summary-grid"></div>
-      </section>
-
-      <section class="summary-section">
-        <h2 class="summary-heading">Game Team Stats</h2>
-        <div id="gameSummary" class="summary-grid"></div>
-      </section>
-
-      <section class="summary-section">
-        <h2 class="summary-heading">Quarter Breakdown</h2>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Quarter</th>
-                <th>OREB</th>
-                <th>DREB</th>
-                <th>Live TO</th>
-                <th>Dead TO</th>
-                <th>Opp OREB</th>
-                <th>Transition</th>
-              </tr>
-            </thead>
-
-            <tbody id="quarterTable"></tbody>
-          </table>
-        </div>
+        <h2 id="periodBreakdownHeading" class="summary-heading">Period Breakdown</h2>
+        <div id="periodBreakdownTable" class="table-wrap"></div>
       </section>
     </section>
 
@@ -1125,7 +1213,9 @@
         liveTurnovers: 0,
         deadTurnovers: 0,
         opponentOreb: 0,
-        transitionPoints: 0
+        transitionPoints: 0,
+        freeThrowsMade: 0,
+        freeThrowsAttempted: 0
       };
     }
 
@@ -1135,7 +1225,8 @@
           1: 0,
           2: 0,
           3: 0,
-          4: 0
+          4: 0,
+          5: 0
         },
         scoringHistory: []
       };
@@ -1154,6 +1245,7 @@
     function createNewGame() {
       return {
         opponent: "",
+        gameFormat: "quarters",
         quarter: 1,
         history: [],
         transitionEntries: [],
@@ -1161,7 +1253,8 @@
           1: emptyQuarter(),
           2: emptyQuarter(),
           3: emptyQuarter(),
-          4: emptyQuarter()
+          4: emptyQuarter(),
+          5: emptyQuarter()
         },
         players: emptyPlayers()
       };
@@ -1179,7 +1272,7 @@
         };
       }
 
-      [1, 2, 3, 4].forEach((quarter) => {
+      [1, 2, 3, 4, 5].forEach((quarter) => {
         normalized.quarterPoints[quarter] =
           Number(normalized.quarterPoints[quarter] || 0);
       });
@@ -1213,7 +1306,7 @@
         normalized.quarters = {};
       }
 
-      [1, 2, 3, 4].forEach((quarter) => {
+      [1, 2, 3, 4, 5].forEach((quarter) => {
         normalized.quarters[quarter] = {
           ...emptyQuarter(),
           ...(normalized.quarters[quarter] || {})
@@ -1248,7 +1341,19 @@
           points: Number(entry.points || 0)
         }));
 
+      normalized.gameFormat =
+        normalized.gameFormat === "halves" ? "halves" : "quarters";
+
       normalized.quarter = Number(normalized.quarter || 1);
+
+      const allowedPeriods =
+        normalized.gameFormat === "halves"
+          ? [1, 2, 5]
+          : [1, 2, 3, 4, 5];
+
+      if (!allowedPeriods.includes(normalized.quarter)) {
+        normalized.quarter = 1;
+      }
 
       return normalized;
     }
@@ -1309,8 +1414,36 @@
       }, 0);
     }
 
+    function activePeriods(game) {
+      return game.gameFormat === "halves"
+        ? [1, 2, 5]
+        : [1, 2, 3, 4, 5];
+    }
+
+    function firstHalfPeriods(game) {
+      return game.gameFormat === "halves" ? [1] : [1, 2];
+    }
+
+    function secondHalfPeriods(game) {
+      return game.gameFormat === "halves" ? [2] : [3, 4];
+    }
+
+    function overtimePeriods() {
+      return [5];
+    }
+
+    function periodLabel(game, period) {
+      if (period === 5) return "OT";
+
+      if (game.gameFormat === "halves") {
+        return period === 1 ? "1st Half" : "2nd Half";
+      }
+
+      return `Q${period}`;
+    }
+
     function playerGamePoints(game, name) {
-      return playerHalfPoints(game, name, [1, 2, 3, 4]);
+      return playerHalfPoints(game, name, activePeriods(game));
     }
 
     function playerPointsTotal(game) {
@@ -1325,6 +1458,87 @@
       );
 
       return definition?.short || statKey;
+    }
+
+    function freeThrowPercentage(made, attempted) {
+      return attempted > 0
+        ? `${((made / attempted) * 100).toFixed(1)}%`
+        : "0.0%";
+    }
+
+    function freeThrowTotals(game, periods) {
+      const made = periodTotal(game, "freeThrowsMade", periods);
+      const attempted = periodTotal(
+        game,
+        "freeThrowsAttempted",
+        periods
+      );
+
+      return {
+        made,
+        attempted,
+        percentage: freeThrowPercentage(made, attempted)
+      };
+    }
+
+    function changeFreeThrow(result) {
+      const period = gameState.quarter;
+      const stats = gameState.quarters[period];
+
+      if (result === "made") {
+        stats.freeThrowsMade += 1;
+        stats.freeThrowsAttempted += 1;
+      } else {
+        stats.freeThrowsAttempted += 1;
+      }
+
+      gameState.history.push({
+        type: "free-throw",
+        quarter: period,
+        result
+      });
+
+      saveCurrentGame();
+      render();
+      showToast(
+        result === "made"
+          ? `Free throw made — ${periodLabel(gameState, period)}`
+          : `Free throw missed — ${periodLabel(gameState, period)}`
+      );
+    }
+
+    function undoLastFreeThrow() {
+      for (
+        let index = gameState.history.length - 1;
+        index >= 0;
+        index -= 1
+      ) {
+        const entry = gameState.history[index];
+
+        if (entry.type !== "free-throw") continue;
+
+        const stats = gameState.quarters[entry.quarter];
+
+        stats.freeThrowsAttempted = Math.max(
+          0,
+          stats.freeThrowsAttempted - 1
+        );
+
+        if (entry.result === "made") {
+          stats.freeThrowsMade = Math.max(
+            0,
+            stats.freeThrowsMade - 1
+          );
+        }
+
+        gameState.history.splice(index, 1);
+        saveCurrentGame();
+        render();
+        showToast("Last free throw undone");
+        return;
+      }
+
+      showToast("No free throw to undo");
     }
 
     function showToast(message) {
@@ -1392,7 +1606,7 @@
       render();
 
       showToast(
-        `Transition +${points} in Quarter ${quarter}`
+        `Transition +${points} in ${periodLabel(gameState, quarter)}`
       );
     }
 
@@ -1441,7 +1655,7 @@
       render();
 
       showToast(
-        `Transition +${entry.points} removed from Quarter ${entry.quarter}`
+        `Transition +${entry.points} removed from ${periodLabel(gameState, entry.quarter)}`
       );
     }
 
@@ -1499,6 +1713,24 @@
         );
       }
 
+      if (last.type === "free-throw") {
+        const stats = gameState.quarters[last.quarter];
+
+        stats.freeThrowsAttempted = Math.max(
+          0,
+          stats.freeThrowsAttempted - 1
+        );
+
+        if (last.result === "made") {
+          stats.freeThrowsMade = Math.max(
+            0,
+            stats.freeThrowsMade - 1
+          );
+        }
+
+        showToast("Last free throw undone");
+      }
+
       saveCurrentGame();
       render();
     }
@@ -1518,7 +1750,7 @@
       render();
 
       showToast(
-        `${playerName} +${points} in Quarter ${quarter}`
+        `${playerName} +${points} in ${periodLabel(gameState, quarter)}`
       );
     }
 
@@ -1547,17 +1779,49 @@
     }
 
     function nextQuarter() {
-      if (gameState.quarter >= 4) {
-        showToast("Already in Quarter 4");
+      const periods = activePeriods(gameState);
+      const currentIndex = periods.indexOf(gameState.quarter);
+
+      if (currentIndex >= periods.length - 1) {
+        showToast("Already in overtime");
         return;
       }
 
-      gameState.quarter += 1;
+      gameState.quarter = periods[currentIndex + 1];
 
       saveCurrentGame();
       render();
 
-      showToast(`Quarter ${gameState.quarter}`);
+      showToast(periodLabel(gameState, gameState.quarter));
+    }
+
+    function setGameFormat(format) {
+      if (!["quarters", "halves"].includes(format)) return;
+
+      const hasStats = activePeriods(gameState).some((period) => {
+        const stats = gameState.quarters[period];
+        return Object.values(stats).some((value) => Number(value) > 0);
+      }) || playerPointsTotal(gameState) > 0;
+
+      if (
+        hasStats &&
+        format !== gameState.gameFormat &&
+        !confirm("Changing the game format will start a new game. Continue?")
+      ) {
+        return;
+      }
+
+      if (hasStats && format !== gameState.gameFormat) {
+        const opponent = gameState.opponent;
+        gameState = createNewGame();
+        gameState.opponent = opponent;
+      }
+
+      gameState.gameFormat = format;
+      gameState.quarter = 1;
+      saveCurrentGame();
+      render();
+      showToast(format === "quarters" ? "Quarter format" : "Half format");
     }
 
     function startNewGame() {
@@ -1588,7 +1852,7 @@
       }
 
       const ourScore = prompt(
-        "Enter the Sideline IQ' final score:"
+        "Enter the Lady Lancers final score:"
       );
 
       if (ourScore === null) {
@@ -1636,6 +1900,7 @@
         date: gameDate,
         ourScore: ourScore.trim(),
         opponentScore: opponentScore.trim(),
+        gameFormat: gameState.gameFormat,
         quarters: JSON.parse(
           JSON.stringify(gameState.quarters)
         ),
@@ -1733,7 +1998,8 @@
                   </div>
 
                   <div class="player-quarter">
-                    Q${gameState.quarter}: ${currentQuarterPoints}
+                    ${periodLabel(gameState, gameState.quarter)}:
+                    ${currentQuarterPoints}
                   </div>
                 </div>
 
@@ -1844,45 +2110,144 @@
     function playerScoringRows(game) {
       return roster
         .map((name) => {
-          const q1 = playerQuarterPoints(game, name, 1);
-          const q2 = playerQuarterPoints(game, name, 2);
-          const q3 = playerQuarterPoints(game, name, 3);
-          const q4 = playerQuarterPoints(game, name, 4);
+          const firstHalf = playerHalfPoints(
+            game,
+            name,
+            firstHalfPeriods(game)
+          );
+          const secondHalf = playerHalfPoints(
+            game,
+            name,
+            secondHalfPeriods(game)
+          );
+          const overtime = playerHalfPoints(
+            game,
+            name,
+            overtimePeriods()
+          );
+          const total = playerGamePoints(game, name);
 
           return `
             <tr>
               <td>${name}</td>
-              <td>${q1}</td>
-              <td>${q2}</td>
-              <td>${q1 + q2}</td>
-              <td>${q3}</td>
-              <td>${q4}</td>
-              <td>${q3 + q4}</td>
-              <td>${q1 + q2 + q3 + q4}</td>
+              <td>${firstHalf}</td>
+              <td>${secondHalf}</td>
+              <td>${overtime}</td>
+              <td>${total}</td>
             </tr>
           `;
         })
         .join("");
     }
 
-    function quarterRows(game) {
-      return [1, 2, 3, 4]
-        .map((quarter) => {
-          const stats = game.quarters[quarter];
+    function periodRows(game) {
+      return activePeriods(game)
+        .map((period) => {
+          const stats = game.quarters[period];
+          const ft = freeThrowTotals(game, [period]);
 
           return `
             <tr>
-              <td>Q${quarter}</td>
+              <td>${periodLabel(game, period)}</td>
               <td>${stats.oreb}</td>
               <td>${stats.dreb}</td>
               <td>${stats.liveTurnovers}</td>
               <td>${stats.deadTurnovers}</td>
               <td>${stats.opponentOreb}</td>
               <td>${stats.transitionPoints || 0}</td>
+              <td>${ft.made}</td>
+              <td>${ft.attempted}</td>
+              <td class="percent-cell">${ft.percentage}</td>
             </tr>
           `;
         })
         .join("");
+    }
+
+    function teamSummaryTable(game) {
+      const groups = [
+        ["1st Half", firstHalfPeriods(game)],
+        ["2nd Half", secondHalfPeriods(game)],
+        ["OT", overtimePeriods()],
+        ["Total", activePeriods(game)]
+      ];
+
+      const rows = [
+        ["Our OREB", "oreb"],
+        ["Our DREB", "dreb"],
+        ["Live TO", "liveTurnovers"],
+        ["Dead TO", "deadTurnovers"],
+        ["Opp OREB", "opponentOreb"],
+        ["Transition", "transitionPoints"]
+      ].map(([label, key]) => `
+        <tr>
+          <td>${label}</td>
+          ${groups.map(([, periods]) =>
+            `<td>${periodTotal(game, key, periods)}</td>`
+          ).join("")}
+        </tr>
+      `);
+
+      const made = groups.map(([, periods]) =>
+        freeThrowTotals(game, periods).made
+      );
+      const attempted = groups.map(([, periods]) =>
+        freeThrowTotals(game, periods).attempted
+      );
+      const percentages = groups.map(([, periods]) =>
+        freeThrowTotals(game, periods).percentage
+      );
+
+      rows.push(`
+        <tr>
+          <td>FT Made</td>
+          ${made.map((value) => `<td>${value}</td>`).join("")}
+        </tr>
+        <tr>
+          <td>FT Attempted</td>
+          ${attempted.map((value) => `<td>${value}</td>`).join("")}
+        </tr>
+        <tr>
+          <td>FT %</td>
+          ${percentages.map((value) =>
+            `<td class="percent-cell">${value}</td>`
+          ).join("")}
+        </tr>
+      `);
+
+      return `
+        <table class="summary-matrix">
+          <thead>
+            <tr>
+              <th>Stat</th>
+              ${groups.map(([label]) => `<th>${label}</th>`).join("")}
+            </tr>
+          </thead>
+          <tbody>${rows.join("")}</tbody>
+        </table>
+      `;
+    }
+
+    function periodBreakdownTable(game) {
+      return `
+        <table class="summary-matrix">
+          <thead>
+            <tr>
+              <th>Period</th>
+              <th>OREB</th>
+              <th>DREB</th>
+              <th>Live TO</th>
+              <th>Dead TO</th>
+              <th>Opp OREB</th>
+              <th>Transition</th>
+              <th>FTM</th>
+              <th>FTA</th>
+              <th>FT%</th>
+            </tr>
+          </thead>
+          <tbody>${periodRows(game)}</tbody>
+        </table>
+      `;
     }
 
     function renderCurrentSummary() {
@@ -1891,142 +2256,74 @@
       ).innerHTML = playerScoringRows(gameState);
 
       document.getElementById(
-        "firstHalfSummary"
-      ).innerHTML = summaryCards(gameState, [1, 2]);
+        "teamSummaryMatrix"
+      ).innerHTML = teamSummaryTable(gameState);
 
       document.getElementById(
-        "secondHalfSummary"
-      ).innerHTML = summaryCards(gameState, [3, 4]);
+        "periodBreakdownHeading"
+      ).textContent =
+        gameState.gameFormat === "halves"
+          ? "Half / Overtime Breakdown"
+          : "Quarter / Overtime Breakdown";
 
       document.getElementById(
-        "gameSummary"
-      ).innerHTML = summaryCards(
-        gameState,
-        [1, 2, 3, 4]
-      );
-
-      document.getElementById(
-        "quarterTable"
-      ).innerHTML = quarterRows(gameState);
+        "periodBreakdownTable"
+      ).innerHTML = periodBreakdownTable(gameState);
     }
 
     function createReport(game) {
       const opponent = game.opponent || "Opponent";
       const totalPoints = playerPointsTotal(game);
+      const firstFt = freeThrowTotals(game, firstHalfPeriods(game));
+      const secondFt = freeThrowTotals(game, secondHalfPeriods(game));
+      const otFt = freeThrowTotals(game, overtimePeriods());
+      const totalFt = freeThrowTotals(game, activePeriods(game));
 
       const playerLines = roster.map((name) => {
         const firstHalf =
-          playerHalfPoints(game, name, [1, 2]);
-
+          playerHalfPoints(game, name, firstHalfPeriods(game));
         const secondHalf =
-          playerHalfPoints(game, name, [3, 4]);
+          playerHalfPoints(game, name, secondHalfPeriods(game));
+        const overtime =
+          playerHalfPoints(game, name, overtimePeriods());
+        const total = playerGamePoints(game, name);
 
-        const total =
-          playerGamePoints(game, name);
-
-        return `${name}: 1H ${firstHalf}, 2H ${secondHalf}, Total ${total}`;
+        return `${name}: 1H ${firstHalf}, 2H ${secondHalf}, OT ${overtime}, Total ${total}`;
       });
 
+      const statLine = (label, key, periods) =>
+        `${label}: ${periodTotal(game, key, periods)}`;
+
+      const section = (title, periods, ft) => [
+        "",
+        title,
+        statLine("OREB", "oreb", periods),
+        statLine("DREB", "dreb", periods),
+        statLine("Live TO", "liveTurnovers", periods),
+        statLine("Dead TO", "deadTurnovers", periods),
+        statLine("Opponent OREB", "opponentOreb", periods),
+        statLine("Transition", "transitionPoints", periods),
+        `Free Throws: ${ft.made}/${ft.attempted} (${ft.percentage})`
+      ];
+
       const lines = [
-        `Sideline IQ vs ${opponent}`,
+        `Lady Lancers vs ${opponent}`,
         game.date || "",
-
         game.ourScore !== undefined
-          ? `Final Score: Sideline IQ ${game.ourScore}, ${opponent} ${game.opponentScore}`
+          ? `Final Score: Lady Lancers ${game.ourScore}, ${opponent} ${game.opponentScore}`
           : "",
-
+        `Game Format: ${game.gameFormat === "halves" ? "Halves" : "Quarters"}`,
         "",
         "PLAYER POINTS",
         ...playerLines,
         `Player Points Total: ${totalPoints}`,
-
-        "",
-        "FIRST HALF TEAM STATS",
-        `OREB: ${periodTotal(game, "oreb", [1, 2])}`,
-        `DREB: ${periodTotal(game, "dreb", [1, 2])}`,
-        `Live TO: ${periodTotal(
-          game,
-          "liveTurnovers",
-          [1, 2]
-        )}`,
-        `Dead TO: ${periodTotal(
-          game,
-          "deadTurnovers",
-          [1, 2]
-        )}`,
-        `Opponent OREB: ${periodTotal(
-          game,
-          "opponentOreb",
-          [1, 2]
-        )}`,
-        `Transition: ${periodTotal(
-          game,
-          "transitionPoints",
-          [1, 2]
-        )}`,
-
-        "",
-        "SECOND HALF TEAM STATS",
-        `OREB: ${periodTotal(game, "oreb", [3, 4])}`,
-        `DREB: ${periodTotal(game, "dreb", [3, 4])}`,
-        `Live TO: ${periodTotal(
-          game,
-          "liveTurnovers",
-          [3, 4]
-        )}`,
-        `Dead TO: ${periodTotal(
-          game,
-          "deadTurnovers",
-          [3, 4]
-        )}`,
-        `Opponent OREB: ${periodTotal(
-          game,
-          "opponentOreb",
-          [3, 4]
-        )}`,
-        `Transition: ${periodTotal(
-          game,
-          "transitionPoints",
-          [3, 4]
-        )}`,
-
-        "",
-        "GAME TEAM STATS",
-        `OREB: ${periodTotal(
-          game,
-          "oreb",
-          [1, 2, 3, 4]
-        )}`,
-        `DREB: ${periodTotal(
-          game,
-          "dreb",
-          [1, 2, 3, 4]
-        )}`,
-        `Live TO: ${periodTotal(
-          game,
-          "liveTurnovers",
-          [1, 2, 3, 4]
-        )}`,
-        `Dead TO: ${periodTotal(
-          game,
-          "deadTurnovers",
-          [1, 2, 3, 4]
-        )}`,
-        `Opponent OREB: ${periodTotal(
-          game,
-          "opponentOreb",
-          [1, 2, 3, 4]
-        )}`,
-        `Transition: ${periodTotal(
-          game,
-          "transitionPoints",
-          [1, 2, 3, 4]
-        )}`
+        ...section("FIRST HALF TEAM STATS", firstHalfPeriods(game), firstFt),
+        ...section("SECOND HALF TEAM STATS", secondHalfPeriods(game), secondFt),
+        ...section("OVERTIME TEAM STATS", overtimePeriods(), otFt),
+        ...section("GAME TEAM STATS", activePeriods(game), totalFt)
       ];
 
-      return lines
-        .filter((line) => line !== "")
-        .join("\n");
+      return lines.filter(Boolean).join("\n");
     }
 
     async function copyReport(game) {
@@ -2111,7 +2408,7 @@
               <div class="saved-header">
                 <div>
                   <h2 class="saved-opponent">
-                    Sideline IQ vs ${game.opponent}
+                    Lady Lancers vs ${game.opponent}
                   </h2>
 
                   <p class="saved-meta">
@@ -2154,12 +2451,9 @@
                     <thead>
                       <tr>
                         <th>Player</th>
-                        <th>Q1</th>
-                        <th>Q2</th>
                         <th>1st Half</th>
-                        <th>Q3</th>
-                        <th>Q4</th>
                         <th>2nd Half</th>
+                        <th>OT</th>
                         <th>Total</th>
                       </tr>
                     </thead>
@@ -2170,44 +2464,19 @@
                   </table>
                 </div>
 
-                <h3>First Half Team Stats</h3>
-
-                <div class="summary-grid">
-                  ${summaryCards(game, [1, 2])}
+                <h3>Team Stat Summary</h3>
+                <div class="table-wrap">
+                  ${teamSummaryTable(game)}
                 </div>
 
-                <h3>Second Half Team Stats</h3>
-
-                <div class="summary-grid">
-                  ${summaryCards(game, [3, 4])}
-                </div>
-
-                <h3>Game Team Stats</h3>
-
-                <div class="summary-grid">
-                  ${summaryCards(game, [1, 2, 3, 4])}
-                </div>
-
-                <h3>Quarter Breakdown</h3>
+                <h3>
+                  ${game.gameFormat === "halves"
+                    ? "Half / Overtime Breakdown"
+                    : "Quarter / Overtime Breakdown"}
+                </h3>
 
                 <div class="table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Quarter</th>
-                        <th>OREB</th>
-                        <th>DREB</th>
-                        <th>Live TO</th>
-                        <th>Dead TO</th>
-                        <th>Opp OREB</th>
-                        <th>Transition</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      ${quarterRows(game)}
-                    </tbody>
-                  </table>
+                  ${periodBreakdownTable(game)}
                 </div>
               </div>
             </article>
@@ -2255,86 +2524,44 @@
         return;
       }
 
-      const rows = [
-        [
-          "Record Type",
-          "Date",
-          "Opponent",
-          "Sideline IQ Score",
-          "Opponent Score",
-          "Quarter",
-          "Player",
-          "Q1 Points",
-          "Q2 Points",
-          "First Half Points",
-          "Q3 Points",
-          "Q4 Points",
-          "Second Half Points",
-          "Total Points",
-          "OREB",
-          "DREB",
-          "Live TO",
-          "Dead TO",
-          "Opponent OREB",
-          "Transition Points"
-        ]
-      ];
+      const rows = [[
+        "Record Type", "Date", "Opponent",
+        "Lady Lancers Score", "Opponent Score",
+        "Game Format", "Period", "Player",
+        "First Half Points", "Second Half Points",
+        "OT Points", "Total Points",
+        "OREB", "DREB", "Live TO", "Dead TO",
+        "Opponent OREB", "Transition Points",
+        "FT Made", "FT Attempted", "FT Percentage"
+      ]];
 
       savedGames.forEach((game) => {
-        [1, 2, 3, 4].forEach((quarter) => {
-          const stats = game.quarters[quarter];
+        activePeriods(game).forEach((period) => {
+          const stats = game.quarters[period];
+          const ft = freeThrowTotals(game, [period]);
 
           rows.push([
-            "Team Stats",
-            game.date,
-            game.opponent,
-            game.ourScore,
-            game.opponentScore,
-            `Q${quarter}`,
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            stats.oreb,
-            stats.dreb,
-            stats.liveTurnovers,
-            stats.deadTurnovers,
-            stats.opponentOreb,
-            stats.transitionPoints || 0
+            "Team Stats", game.date, game.opponent,
+            game.ourScore, game.opponentScore,
+            game.gameFormat, periodLabel(game, period), "",
+            "", "", "", "",
+            stats.oreb, stats.dreb,
+            stats.liveTurnovers, stats.deadTurnovers,
+            stats.opponentOreb, stats.transitionPoints || 0,
+            ft.made, ft.attempted, ft.percentage
           ]);
         });
 
         roster.forEach((name) => {
-          const q1 = playerQuarterPoints(game, name, 1);
-          const q2 = playerQuarterPoints(game, name, 2);
-          const q3 = playerQuarterPoints(game, name, 3);
-          const q4 = playerQuarterPoints(game, name, 4);
-
           rows.push([
-            "Player Points",
-            game.date,
-            game.opponent,
-            game.ourScore,
-            game.opponentScore,
-            "",
-            name,
-            q1,
-            q2,
-            q1 + q2,
-            q3,
-            q4,
-            q3 + q4,
-            q1 + q2 + q3 + q4,
-            "",
-            "",
-            "",
-            "",
-            "",
-            ""
+            "Player Points", game.date, game.opponent,
+            game.ourScore, game.opponentScore,
+            game.gameFormat, "", name,
+            playerHalfPoints(game, name, firstHalfPeriods(game)),
+            playerHalfPoints(game, name, secondHalfPeriods(game)),
+            playerHalfPoints(game, name, overtimePeriods()),
+            playerGamePoints(game, name),
+            "", "", "", "", "", "", "", "", ""
           ]);
         });
       });
@@ -2352,12 +2579,11 @@
 
       link.href = url;
       link.download =
-        "lady-lancers-saved-games-player-points-transition.csv";
+        "lady-lancers-saved-games-v2.csv";
 
       document.body.appendChild(link);
       link.click();
       link.remove();
-
       URL.revokeObjectURL(url);
 
       showToast("CSV exported");
@@ -2393,13 +2619,37 @@
       document.getElementById("opponent").value =
         gameState.opponent;
 
-      document.getElementById("quarter").value =
-        String(gameState.quarter);
+      const periodSelect = document.getElementById("quarter");
+      periodSelect.innerHTML = activePeriods(gameState)
+        .map((period) => `
+          <option value="${period}">
+            ${periodLabel(gameState, period)}
+          </option>
+        `)
+        .join("");
+      periodSelect.value = String(gameState.quarter);
+
+      document
+        .getElementById("quartersFormatButton")
+        .classList.toggle(
+          "active",
+          gameState.gameFormat === "quarters"
+        );
+
+      document
+        .getElementById("halvesFormatButton")
+        .classList.toggle(
+          "active",
+          gameState.gameFormat === "halves"
+        );
 
       document.getElementById(
         "quarterMessage"
       ).textContent =
-        `Currently tracking Quarter ${gameState.quarter}`;
+        `Currently tracking ${periodLabel(
+          gameState,
+          gameState.quarter
+        )}`;
 
       document.getElementById(
         "transitionQuarterTotal"
@@ -2407,6 +2657,16 @@
         gameState.quarters[
           gameState.quarter
         ].transitionPoints;
+
+      const currentFt = freeThrowTotals(
+        gameState,
+        [gameState.quarter]
+      );
+
+      document.getElementById(
+        "freeThrowLine"
+      ).textContent =
+        `${currentFt.made} / ${currentFt.attempted} — ${currentFt.percentage}`;
 
       renderTrackingButtons();
       renderPlayers();
@@ -2419,6 +2679,18 @@
       .addEventListener("input", (event) => {
         gameState.opponent = event.target.value;
         saveCurrentGame();
+      });
+
+    document
+      .getElementById("quartersFormatButton")
+      .addEventListener("click", () => {
+        setGameFormat("quarters");
+      });
+
+    document
+      .getElementById("halvesFormatButton")
+      .addEventListener("click", () => {
+        setGameFormat("halves");
       });
 
     document
@@ -2446,6 +2718,22 @@
           );
         });
       });
+
+    document
+      .getElementById("freeThrowMadeButton")
+      .addEventListener("click", () => {
+        changeFreeThrow("made");
+      });
+
+    document
+      .getElementById("freeThrowMissButton")
+      .addEventListener("click", () => {
+        changeFreeThrow("miss");
+      });
+
+    document
+      .getElementById("undoFreeThrowButton")
+      .addEventListener("click", undoLastFreeThrow);
 
     document
       .getElementById("undoTransitionButton")
